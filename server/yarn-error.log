@@ -1,0 +1,51 @@
+Arguments:
+  /Users/trevorcoleman/.nvm/versions/node/v15.6.0/bin/node /usr/local/Cellar/yarn/1.22.10/libexec/bin/yarn.js add -D typescript
+
+PATH:
+  /usr/local/Cellar/pyenv-virtualenv/1.1.5/shims:/Users/trevorcoleman/.pyenv/shims:/Users/trevorcoleman/google-cloud-sdk/bin://anaconda/bin:/Users/trevorcoleman/miniconda2/bin:/Users/trevorcoleman/.nvm/versions/node/v15.6.0/bin:/Users/trevorcoleman/.zplug/bin:/Users/trevorcoleman/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/usr/local/go/bin:/usr/local/share/dotnet:/opt/X11/bin:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin:/Users/trevorcoleman/.dotnet/tools:~/Library/Application Support/JetBrains/Toolbox/apps:/Library/PostgreSQL/13/bin:/usr/local/opt/fzf/bin
+
+Yarn version:
+  1.22.10
+
+Node version:
+  15.6.0
+
+Platform:
+  darwin x64
+
+Trace:
+  SyntaxError: /Users/trevorcoleman/dev/ql-troika/server/package.json: Unexpected token } in JSON at position 469
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.10/libexec/lib/cli.js:321:13
+
+npm manifest:
+  {
+    "name"            : "ql-troika",
+    "version"         : "1.0.0",
+    "description"     : "GraphQL Backend For Troika Character Sheet",
+    "main"            : "src/application.ts",
+    "scripts"         : {
+      "start" : "nodemon src/index"
+    },
+    "dependencies"    : {
+      "apollo-datasource-rest" : "^0.13.0",
+      "apollo-server"          : "^2.24.0",
+      "graphql"                : "^15.5.0"
+    },
+    "devDependencies" : {
+      "dotenv"  : "^8.2.0",
+      "nodemon" : "^2.0.4",
+    },
+    "author"          : "Raphael Terrier @R4ph-t",
+    "license"         : "MIT",
+    "private"         : true
+  }
+
+yarn manifest:
+  No manifest
+
+Lockfile:
+  No lockfile

@@ -7,31 +7,32 @@ import {
   MODULE_ID,
   testkit,
 } from 'graphql-modules';
-import { Profile, ProfileInput } from '../../generated/graphql';
+import { User, UserInput } from '../../generated/graphql';
 import {
-  IProfilesProvider, PROFILES_PROVIDER, ProfilesProvider,
-} from '../../providers/profilesProvider';
+  IUsersProvider, USERS_PROVIDER, UsersProvider,
+} from '../../providers/users-provider';
 import { application } from '../Application';
-import { IProfileModuleConfig, profileModule } from './profileModule';
+import { IUserModuleConfig, userModule } from './user-module';
 
-describe('profileModule', () => {
+describe('userModule', () => {
 
 
 
   it('set up correctly', () => {
-    const app = testkit.testModule(profileModule, {
+    const app = testkit.testModule(userModule, {
       replaceExtensions: true,
     });
     expect(app.schema.getQueryType())
         .toBeDefined();
   });
 
-    describe('Query profile(id) {}', () => {
+    describe('Query user(id) {}', () => {
       let id: string;
-      let profile: Profile;
-      const makeTestProfileFromId = (id: string) => (
+      let user: User;
+      const makeTestUserFromId = (id: string) => (
           {
-            displayName: `testDisplayName-${id}`,
+            _id: id,
+            name: `testName-${id}`,
             email      : `testEmail@email.com-${id}`,
           }
 
@@ -40,23 +41,24 @@ describe('profileModule', () => {
       beforeEach(() => {
         id = "some-test-id";
 
-        profile = {
-          displayName: 'testDisplayName',
+        user = {
+          _id: id,
+          name: 'testName',
           email      : 'testEmail@email.com',
         };
 
       });
 
-    it('calls ProfileProvider.getProfileById() with id for profile query', async () => {
+    it('calls UserProvider.getUserById() with id for user query', async () => {
 
       const app = testkit.mockApplication(application)
-                         .replaceModule(testkit.mockModule(profileModule, {
+                         .replaceModule(testkit.mockModule(userModule, {
                            providers: [
                              {
-                               provide : PROFILES_PROVIDER,
+                               provide : USERS_PROVIDER,
                                useValue: {
-                                 getProfileById(id: string): Profile | null {
-                                   return makeTestProfileFromId(id);
+                                 getUserById(id: string): User | null {
+                                   return makeTestUserFromId(id);
                                  },
                                },
                              },
@@ -65,9 +67,9 @@ describe('profileModule', () => {
 
         const resultPromise = testkit.execute(app, {
             document    : gql`query Query($id: ID! ) {
-                profile(id: $id)  {
-                    displayName
-                    email
+                user(id: $id)  {
+                    name
+                    email 
                     games
                     characters
                 }
@@ -78,46 +80,46 @@ describe('profileModule', () => {
       const result = (
           await resultPromise).data;
 
-      //Returns Profile
+      //Returns User
       expect(result)
-          .toHaveProperty('profile');
+          .toHaveProperty('user');
 
       //Has correct properties
-      expect(result?.profile)
-          .toHaveProperty('displayName');
-      expect(result?.profile)
+      expect(result?.user)
+          .toHaveProperty('name');
+      expect(result?.user)
           .toHaveProperty('email');
 
       //Properties include the test id;
-      expect(result?.profile?.displayName)
-          .toEqual(makeTestProfileFromId(id).displayName);
-      expect(result?.profile?.email)
-          .toEqual(makeTestProfileFromId(id).email);
+      expect(result?.user?.name)
+          .toEqual(makeTestUserFromId(id).name);
+      expect(result?.user?.email)
+          .toEqual(makeTestUserFromId(id).email);
     });
 
 
 
     })
 
-  describe('Mutation createProfile(profileInput) {}', () => {
+  describe('Mutation createUser(userInput) {}', () => {
     let app: Application;
-    let profileInput: ProfileInput;
+    let userInput: UserInput;
 
     beforeEach(()=>{
 
-      profileInput = {
-        displayName: 'testDisplayName',
+      userInput = {
+        name: 'testName',
         email      : 'testEmail',
         password   : 'testPassword'
 
       }
 
       app = testkit.mockApplication(application)
-                         .replaceModule(testkit.mockModule(profileModule, {
+                         .replaceModule(testkit.mockModule(userModule, {
                            providers: [
-                             {provide : PROFILES_PROVIDER,
+                             {provide : USERS_PROVIDER,
                                useValue: {
-                               createProfile: (profileInput: ProfileInput)=> {
+                               createUser: (userInput: UserInput)=> {
                                    return "12345"
                                  }
                                },
@@ -126,31 +128,31 @@ describe('profileModule', () => {
                          }));
     })
 
-    test('returns an error if profile is not created', async ()=> {
+    test('returns an error if user is not created', async ()=> {
 
         const result = await testkit.execute(app, {
             document    : gql`
-                mutation Mutation($profileInput: ProfileInput!) 
+                mutation Mutation($userInput: UserInput!) 
                 {
-                createProfile(profileInput: $profileInput)
+                createUser(userInput: $userInput)
             }`,
-          variableValues: {profile: profileInput},
+          variableValues: {user: userInput},
         });
 
         expect(result).toHaveProperty('errors')
     })
 
 
-      test('returns error if profileInfo is missing displayName', async () => {
+      test('returns error if userInfo is missing name', async () => {
           const result = await testkit.execute(app, {
               document: gql`
-                  mutation Mutation($profileInput: ProfileInput!)
+                  mutation Mutation($userInput: UserInput!)
                   {
-                      createProfile(profileInput: $profileInput)
+                      createUser(userInput: $userInput)
                   }`,
               variableValues: {
-                profileInput: {
-                  displayName: {...profileInput, displayName: undefined}
+                userInput: {
+                  name: {...userInput, name: undefined}
                 }
               }
           });
@@ -160,17 +162,17 @@ describe('profileModule', () => {
             .toHaveProperty('errors')
       });
 
-      test('returns error if profileInfo is missing email', async () => {
+      test('returns error if userInfo is missing email', async () => {
           const result = await testkit.execute(app, {
               document: gql`
-                  mutation Mutation($profileInput: ProfileInput!)
+                  mutation Mutation($userInput: UserInput!)
                   {
-                      createProfile(profileInput: $profileInput)
+                      createUser(userInput: $userInput)
                   }`,
             variableValues: {
-              profileInput: {
-                displayName: {
-                  ...profileInput,
+              userInput: {
+                name: {
+                  ...userInput,
                   email: undefined
                 }
               }
@@ -181,17 +183,17 @@ describe('profileModule', () => {
             .toHaveProperty('errors')
       });
 
-      test('returns error if profileInfo is missing password', async () => {
+      test('returns error if userInfo is missing password', async () => {
           const result = await testkit.execute(app, {
               document    : gql`
-                  mutation Mutation($profileInput: ProfileInput!)
+                  mutation Mutation($userInput: UserInput!)
                   {
-                      createProfile(profileInput: $profileInput)
+                      createUser(userInput: $userInput)
                   }`,
             variableValues: {
-              profileInput: {
-                displayName: {
-                  ...profileInput,
+              userInput: {
+                name: {
+                  ...userInput,
                   password: undefined
                 }
               }

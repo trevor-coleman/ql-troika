@@ -1,29 +1,51 @@
 // noinspection TypeScriptValidateTypes
 require('dotenv')
-    .config()
+    .config();
+import { SchemaDirectiveVisitor } from 'apollo-server';
 import debug from 'debug';
-import 'reflect-metadata'
+import 'reflect-metadata';
 import { GraphQLSchema } from 'graphql';
-import { pathsToModuleNameMapper } from 'ts-jest';
-
-const {
-  ApolloServer,
-  MockList,
-} = require('apollo-server');
-
+import { getUser } from './auth/auth';
+import { environment } from './config/config';
+import DbUser from './models/DbUser';
 import { application } from './schema/Application';
+import { userSchemaDirectives } from './schema/modules/user-module';
+
 import connectDb from './startup/database';
 
+const {ApolloServer} = require('apollo-server');
 
-const log = debug("app:index")
+const log = debug("app:index");
 
 const schema: GraphQLSchema = application.createSchemaForApollo();
 
-const server = new ApolloServer({schema});
+SchemaDirectiveVisitor.visitSchemaDirectives(schema, {
+  ...userSchemaDirectives
+})
+
+const server = new ApolloServer({
+  schema,
+  async context({req}: { req: { headers: { authorization: string | undefined } } }) {
+    const token = req.headers.authorization;
+    const {
+      user = null,
+      roles = [],
+    } = await getUser(token);
+    return {
+      auth: {
+        token,
+        user,
+        roles,
+      },
+    };
+
+  },
+});
+
 try {
   connectDb();
 } catch (e) {
-  console.log("Server Connection Failed");
+  throw new Error("Server Connection Failed");
 }
 
 server.listen()
@@ -35,7 +57,23 @@ server.listen()
     ================== 
         
     🚀 Server is Running
-    🦻🏻 Listening on Port 4000
+    📦 Env is ${environment.nodeEnv}
+    🦻🏻 Listening on Port ${environment.port}
     📬 Query at https://studio.apollographql.com/graph/ql-troika/explorer?variant=current
     `);
+
+        const testUser = new DbUser({
+          name      : "Test",
+          email     : "test@email.com",
+          password  : "password",
+          roles     : ['user'],
+          games     : [],
+          characters: [],
+
+        });
+
+        log(testUser._id);
+
+
+
       });

@@ -21,6 +21,12 @@ export type Scalars = {
 
 
 
+
+export type AuthToken = {
+  __typename?: 'AuthToken';
+  token?: Maybe<Scalars['String']>;
+};
+
 export type Character = {
   __typename?: 'Character';
   id: Scalars['ID'];
@@ -89,26 +95,12 @@ export type Modifier = {
 export type Mutation = {
   __typename?: 'Mutation';
   _empty?: Maybe<Scalars['String']>;
-  createProfile?: Maybe<Scalars['String']>;
+  createUser?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationCreateProfileArgs = {
-  profileInput: ProfileInput;
-};
-
-export type Profile = {
-  __typename?: 'Profile';
-  displayName: Scalars['String'];
-  email: Scalars['String'];
-  games?: Maybe<Array<Scalars['ID']>>;
-  characters?: Maybe<Array<Scalars['ID']>>;
-};
-
-export type ProfileInput = {
-  displayName: Scalars['String'];
-  email: Scalars['String'];
-  password: Scalars['String'];
+export type MutationCreateUserArgs = {
+  userInput: UserInput;
 };
 
 export type Protection = {
@@ -130,12 +122,20 @@ export type Query = {
   __typename?: 'Query';
   _empty?: Maybe<Scalars['String']>;
   hello: Scalars['String'];
-  profile?: Maybe<Profile>;
+  user?: Maybe<User>;
+  me?: Maybe<User>;
+  signIn?: Maybe<AuthToken>;
 };
 
 
-export type QueryProfileArgs = {
+export type QueryUserArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QuerySignInArgs = {
+  email: Scalars['String'];
+  password: Scalars['String'];
 };
 
 export type Roll = {
@@ -171,6 +171,21 @@ export type Skill = {
 export type Spell = {
   __typename?: 'Spell';
   staminaCost: Scalars['Int'];
+};
+
+export type User = {
+  __typename?: 'User';
+  _id?: Maybe<Scalars['ID']>;
+  name: Scalars['String'];
+  email: Scalars['String'];
+  games?: Maybe<Array<Scalars['ID']>>;
+  characters?: Maybe<Array<Scalars['ID']>>;
+};
+
+export type UserInput = {
+  name: Scalars['String'];
+  email: Scalars['String'];
+  password: Scalars['String'];
 };
 
 export type Webhook = {
@@ -262,9 +277,10 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AuthToken: ResolverTypeWrapper<AuthToken>;
+  String: ResolverTypeWrapper<Scalars['String']>;
   Character: ResolverTypeWrapper<Character>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
-  String: ResolverTypeWrapper<Scalars['String']>;
   CustomSize: ResolverTypeWrapper<CustomSize>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Damage: ResolverTypeWrapper<Damage>;
@@ -273,23 +289,24 @@ export type ResolversTypes = {
   Item: ResolverTypeWrapper<Item>;
   Modifier: ResolverTypeWrapper<Modifier>;
   Mutation: ResolverTypeWrapper<{}>;
-  Profile: ResolverTypeWrapper<Profile>;
-  ProfileInput: ProfileInput;
   Protection: ResolverTypeWrapper<Protection>;
   Quantity: ResolverTypeWrapper<Quantity>;
   Query: ResolverTypeWrapper<{}>;
   Roll: ResolverTypeWrapper<Roll>;
   Skill: ResolverTypeWrapper<Skill>;
   Spell: ResolverTypeWrapper<Spell>;
+  User: ResolverTypeWrapper<User>;
+  UserInput: UserInput;
   Webhook: ResolverTypeWrapper<Webhook>;
   AdditionalEntityFields: AdditionalEntityFields;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AuthToken: AuthToken;
+  String: Scalars['String'];
   Character: Character;
   ID: Scalars['ID'];
-  String: Scalars['String'];
   CustomSize: CustomSize;
   Int: Scalars['Int'];
   Damage: Damage;
@@ -298,17 +315,21 @@ export type ResolversParentTypes = {
   Item: Item;
   Modifier: Modifier;
   Mutation: {};
-  Profile: Profile;
-  ProfileInput: ProfileInput;
   Protection: Protection;
   Quantity: Quantity;
   Query: {};
   Roll: Roll;
   Skill: Skill;
   Spell: Spell;
+  User: User;
+  UserInput: UserInput;
   Webhook: Webhook;
   AdditionalEntityFields: AdditionalEntityFields;
 };
+
+export type AuthDirectiveArgs = {  };
+
+export type AuthDirectiveResolver<Result, Parent, ContextType = any, Args = AuthDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type UnionDirectiveArgs = {   discriminatorField?: Maybe<Scalars['String']>;
   additionalFields?: Maybe<Array<Maybe<AdditionalEntityFields>>>; };
@@ -344,6 +365,11 @@ export type EmbeddedDirectiveResolver<Result, Parent, ContextType = any, Args = 
 export type MapDirectiveArgs = {   path: Scalars['String']; };
 
 export type MapDirectiveResolver<Result, Parent, ContextType = any, Args = MapDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
+export type AuthTokenResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthToken'] = ResolversParentTypes['AuthToken']> = {
+  token?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type CharacterResolvers<ContextType = any, ParentType extends ResolversParentTypes['Character'] = ResolversParentTypes['Character']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -412,15 +438,7 @@ export type ModifierResolvers<ContextType = any, ParentType extends ResolversPar
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   _empty?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  createProfile?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationCreateProfileArgs, 'profileInput'>>;
-};
-
-export type ProfileResolvers<ContextType = any, ParentType extends ResolversParentTypes['Profile'] = ResolversParentTypes['Profile']> = {
-  displayName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  games?: Resolver<Maybe<Array<ResolversTypes['ID']>>, ParentType, ContextType>;
-  characters?: Resolver<Maybe<Array<ResolversTypes['ID']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+  createUser?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'userInput'>>;
 };
 
 export type ProtectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Protection'] = ResolversParentTypes['Protection']> = {
@@ -441,7 +459,9 @@ export type QuantityResolvers<ContextType = any, ParentType extends ResolversPar
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   _empty?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   hello?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<QueryProfileArgs, 'id'>>;
+  user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
+  me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  signIn?: Resolver<Maybe<ResolversTypes['AuthToken']>, ParentType, ContextType, RequireFields<QuerySignInArgs, 'email' | 'password'>>;
 };
 
 export type RollResolvers<ContextType = any, ParentType extends ResolversParentTypes['Roll'] = ResolversParentTypes['Roll']> = {
@@ -479,6 +499,15 @@ export type SpellResolvers<ContextType = any, ParentType extends ResolversParent
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  _id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  games?: Resolver<Maybe<Array<ResolversTypes['ID']>>, ParentType, ContextType>;
+  characters?: Resolver<Maybe<Array<ResolversTypes['ID']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type WebhookResolvers<ContextType = any, ParentType extends ResolversParentTypes['Webhook'] = ResolversParentTypes['Webhook']> = {
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -486,6 +515,7 @@ export type WebhookResolvers<ContextType = any, ParentType extends ResolversPare
 };
 
 export type Resolvers<ContextType = any> = {
+  AuthToken?: AuthTokenResolvers<ContextType>;
   Character?: CharacterResolvers<ContextType>;
   CustomSize?: CustomSizeResolvers<ContextType>;
   Damage?: DamageResolvers<ContextType>;
@@ -493,13 +523,13 @@ export type Resolvers<ContextType = any> = {
   Item?: ItemResolvers<ContextType>;
   Modifier?: ModifierResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
-  Profile?: ProfileResolvers<ContextType>;
   Protection?: ProtectionResolvers<ContextType>;
   Quantity?: QuantityResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Roll?: RollResolvers<ContextType>;
   Skill?: SkillResolvers<ContextType>;
   Spell?: SpellResolvers<ContextType>;
+  User?: UserResolvers<ContextType>;
   Webhook?: WebhookResolvers<ContextType>;
 };
 
@@ -510,6 +540,7 @@ export type Resolvers<ContextType = any> = {
  */
 export type IResolvers<ContextType = any> = Resolvers<ContextType>;
 export type DirectiveResolvers<ContextType = any> = {
+  auth?: AuthDirectiveResolver<any, any, ContextType>;
   union?: UnionDirectiveResolver<any, any, ContextType>;
   abstractEntity?: AbstractEntityDirectiveResolver<any, any, ContextType>;
   entity?: EntityDirectiveResolver<any, any, ContextType>;

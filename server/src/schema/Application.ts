@@ -34,15 +34,7 @@ export type ApplicationContext = GraphQLModules.Context & {
 const application = createApplication({
   modules: [
     emptyQueryModule,
-    characterModule,
-    quantityModule,
-    itemModule,
-    skillModule,
-    modifierModule,
-    gameModule,
     userModule,
-    rollModule,
-
   ],
 
 });

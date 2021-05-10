@@ -7,15 +7,16 @@ import 'reflect-metadata';
 import { GraphQLSchema } from 'graphql';
 import { getUser } from './auth/auth';
 import { environment } from './config/config';
-import DbUser from './models/DbUser';
+import UserDbObject from './models/UserDbObject';
 import { application } from './schema/Application';
-import { userSchemaDirectives } from './schema/modules/user-module';
+import { userSchemaDirectives } from './schema/user';
+
 
 import connectDb from './startup/database';
 
 const {ApolloServer} = require('apollo-server');
 
-const log = debug("app:index");
+const log = debug("ql-troika:index");
 
 const schema: GraphQLSchema = application.createSchemaForApollo();
 
@@ -50,7 +51,7 @@ try {
 
 server.listen()
       .then(() => {
-        console.log(`
+        log(`
         
     ==================    
     QL-TROIKA - SERVER
@@ -61,19 +62,5 @@ server.listen()
     🦻🏻 Listening on Port ${environment.port}
     📬 Query at https://studio.apollographql.com/graph/ql-troika/explorer?variant=current
     `);
-
-        const testUser = new DbUser({
-          name      : "Test",
-          email     : "test@email.com",
-          password  : "password",
-          roles     : ['user'],
-          games     : [],
-          characters: [],
-
-        });
-
-        log(testUser._id);
-
-
 
       });

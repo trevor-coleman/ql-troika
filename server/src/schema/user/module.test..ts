@@ -12,7 +12,7 @@ import {
   IUsersProvider, USERS_PROVIDER, UsersProvider,
 } from '../../providers/users-provider';
 import { application } from '../Application';
-import { IUserModuleConfig, userModule } from './user-module';
+import { IUserModuleConfig, userModule } from './module';
 
 describe('userModule', () => {
 

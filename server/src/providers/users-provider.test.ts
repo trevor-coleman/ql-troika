@@ -2,7 +2,7 @@ import { assertWrappingType } from 'graphql';
 import * as mongoose from 'mongoose';
 import { Schema } from 'mongoose';
 import { UserInput } from '../generated/graphql';
-import DbUser from '../models/DbUser';
+import UserDbObject from '../models/UserDbObject';
 import { UsersProvider } from './users-provider';
 import { ObjectID } from 'mongodb';
 
@@ -34,7 +34,7 @@ describe('UsersProvider', () => {
       throw new Error("ENVIRONMENT IS NOT 'test' -- ABORTING");
     }
 
-    await DbUser.deleteMany({});
+    await UserDbObject.deleteMany({});
 
     const makeObjectId = ()=> {
       const id = new ObjectID();
@@ -63,7 +63,7 @@ describe('UsersProvider', () => {
       games,
     };
 
-    await DbUser.create(user);
+    await UserDbObject.create(user);
   });
 
   describe('getUserById', () => {

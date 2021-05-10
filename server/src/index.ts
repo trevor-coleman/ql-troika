@@ -60,7 +60,7 @@ server.listen()
     🚀 Server is Running
     📦 Env is ${environment.nodeEnv}
     🦻🏻 Listening on Port ${environment.port}
-    📬 Query at https://studio.apollographql.com/graph/ql-troika/explorer?variant=current
+    📬 Query at https://studio.apollographql.com/graph/ql-troika
     `);
 
       });

@@ -2,7 +2,9 @@ import mongoose from 'mongoose';
 import debug from 'debug';
 import {environment} from '../config/config';
 
-const log = debug('app:startup:database');
+const log = debug('ql-troika:startup:database');
+
+
 
 const connectDb = () => {
   mongoose.connect(environment.mongoConnectionString, {

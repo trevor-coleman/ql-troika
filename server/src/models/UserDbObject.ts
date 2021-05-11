@@ -1,10 +1,10 @@
+import bcrypt from 'bcrypt';
 import debug from 'debug';
-import mongoose, { Schema, Document, Model, Types, Query } from 'mongoose';
+import jwt from 'jsonwebtoken';
+import mongoose, { Document, Model, Schema, Types } from 'mongoose';
 import { customAlphabet } from 'nanoid';
 import { nolookalikesSafe } from 'nanoid-dictionary';
 import { environment } from '../config/config';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import idFactory from './IdFactory';
 
 const nanoid = customAlphabet(nolookalikesSafe, 18);
@@ -15,6 +15,7 @@ export interface IUserDbObject {
   games: string[];
   characters: string[];
   password: string;
+  createdAt: Date;
 }
 
 export interface UserDbDocument extends Document, IUserDbObject {
@@ -24,6 +25,7 @@ export interface UserDbDocument extends Document, IUserDbObject {
   generateAuthToken: () => string;
   comparePassword: (password: string) => Promise<boolean>;
   roles: string[],
+  createdAt: Date,
 }
 
 export type UserDbModel = Model<UserDbDocument>;
@@ -75,6 +77,18 @@ export const userDbSchema: Schema<UserDbDocument, UserDbModel> = new Schema({
   },
 });
 
+type FieldsForSelf = "games" | "name" | "email" | "characters" | "createdAt"
+
+userDbSchema.methods.fieldsForSelf = function () : Pick<UserDbDocument, FieldsForSelf > {
+  return {
+    name: this.name,
+    email: this.email,
+    games: this.games,
+    characters: this.characters,
+    createdAt: this.createdAt
+  }
+}
+
 userDbSchema.methods.generateAuthToken = function () {
   return jwt.sign({
     user : this._id,
@@ -83,20 +97,17 @@ userDbSchema.methods.generateAuthToken = function () {
 };
 
 userDbSchema.methods.comparePassword = async function (password: string) {
-  const result = await bcrypt.compare(password, this.password);
-  return result;
+  return await bcrypt.compare(password, this.password);
 };
 
 async function hashPassword(password: string) {
   const salt = await bcrypt.genSalt(10);
-  const saltedPassword = await bcrypt.hash(password, salt);
-  return saltedPassword;
+  return await bcrypt.hash(password, salt);
 }
 
 userDbSchema.pre<UserDbDocument>("save", async function (next) {
   if (this.isModified("password")) {
-    const hashedPassword = await hashPassword(this.password);
-    this.password = hashedPassword;
+    this.password = await hashPassword(this.password);
   }
 });
 

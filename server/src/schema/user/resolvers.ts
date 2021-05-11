@@ -2,6 +2,7 @@ import debug from 'debug';
 import {
   MutationCreateUserArgs, QuerySignInArgs,
 } from '../../generated/graphql';
+import { UserDbDocument } from '../../models/UserDbObject';
 import { USERS_PROVIDER } from '../../providers/users-provider';
 import { ApplicationContext } from '../Application';
 
@@ -11,22 +12,14 @@ const resolvers = {
   Query   : {
 
     async me(_: any, __: any, context: ApplicationContext) {
-      return null;
+      const usersProvider = context.injector.get(USERS_PROVIDER);
+      if(!context.auth.user) return null;
+      return await usersProvider.getUserById(context.auth.user);
     },
 
-    async user(_: any, {id}: { id: string }, context: ApplicationContext) {
-      if (!context.auth.user) return null;
+    async user(_: any, {id}: { id: string }, context: ApplicationContext):Promise<Partial<UserDbDocument>|null> {
       const usersProvider = context.injector.get(USERS_PROVIDER);
-      const user = await usersProvider.getUserById(id);
-
-      if (!user) return null;
-
-      return {
-        _id  : user._id,
-        name : user.name,
-        games: user.games,
-      }
-
+      return  await usersProvider.getUserById(id);
     },
 
     signIn: async function (_: any, {
@@ -55,7 +48,7 @@ const resolvers = {
           null,
           2)}")`);
       const userProvider = context.injector.get(USERS_PROVIDER);
-      const userId = await userProvider.createUser(userInput);
+      const userId = await userProvider.createUser({...userInput});
       if (!userId.success) throw new Error(userId.message);
       return userId.data?.id;
 

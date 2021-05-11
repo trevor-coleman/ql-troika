@@ -7,6 +7,7 @@ import { modifierModule } from './modules/modifier-module';
 import { quantityModule } from './modules/quantity-module';
 import { rollModule } from './modules/roll-module';
 import { skillModule } from './modules/skill-module';
+import scalarsModule from './scalars';
 import { userModule } from './user';
 
 const typeDefs = gql`
@@ -34,6 +35,7 @@ export type ApplicationContext = GraphQLModules.Context & {
 const application = createApplication({
   modules: [
     emptyQueryModule,
+    scalarsModule,
     userModule,
   ],
 

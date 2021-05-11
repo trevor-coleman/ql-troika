@@ -1,8 +1,7 @@
 import debug from 'debug';
 import { Injectable, InjectionToken } from 'graphql-modules';
-import { ObjectID } from 'mongodb';
 import 'reflect-metadata';
-import { User, UserInput } from '../generated/graphql';
+import { Role, UserInput } from '../generated/graphql';
 import UserDbObject, { UserDbDocument } from '../models/UserDbObject';
 import { IProviderResult } from './IProviderResult';
 
@@ -12,7 +11,7 @@ export const USERS_PROVIDER = new InjectionToken<IUsersProvider>(
 const log = debug('ql-troika:providers:user');
 
 export interface IUsersProvider {
-  getUserById(id: string): Promise<User | null>
+  getUserById(id: string): Promise<UserDbDocument | null>
   getUserByEmail(email: string): Promise<UserDbDocument | null>
   signInWithEmailAndPassword(email:string, password:string): Promise<string|null>
   createUser(userInput: UserInput): Promise<ICreateUserResult>
@@ -26,11 +25,6 @@ export interface ICreateUserResult extends IProviderResult{
 export class UsersProvider implements IUsersProvider {
   async getUserById(_id: string): Promise<UserDbDocument | null> {
     log(`getUserById(id: "${_id}")`);
-    try {
-      new ObjectID(_id);
-    } catch (e) {
-      throw new Error("Invalid User ID.")
-    }
     return UserDbObject.findOne({_id}).exec();
   }
 
@@ -51,10 +45,15 @@ export class UsersProvider implements IUsersProvider {
   }
 
 
-  async createUser(userInput: UserInput): Promise<ICreateUserResult> {
+  async createUser(userInput: UserInput, isAdmin?: boolean): Promise<ICreateUserResult> {
     log(`createUser(userInput: ${userInput})`);
 
     const user = new UserDbObject({...userInput});
+
+    const roles = [Role.User]
+    if(isAdmin) roles.push(Role.Admin);
+    user.roles = roles;
+
     try {
       await user.save();
     } catch (error) {

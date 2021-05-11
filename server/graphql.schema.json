@@ -42,6 +42,16 @@
         "possibleTypes": null
       },
       {
+        "kind": "SCALAR",
+        "name": "Date",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "Mutation",
         "description": null,
@@ -213,6 +223,29 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "Role",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "ADMIN",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "USER",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "User",
         "description": null,
@@ -250,13 +283,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -307,7 +336,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "String",
+              "name": "Date",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1285,14 +1314,39 @@
     ],
     "directives": [
       {
-        "name": "auth",
+        "name": "authByRole",
         "description": null,
         "isRepeatable": false,
         "locations": [
-          "FIELD_DEFINITION",
-          "FIELD"
+          "OBJECT",
+          "FIELD_DEFINITION"
         ],
-        "args": []
+        "args": [
+          {
+            "name": "requires",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "Role",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "allowSelf",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ]
       },
       {
         "name": "include",

@@ -31,7 +31,6 @@ describe('userModule', () => {
       let user: User;
       const makeTestUserFromId = (id: string) => (
           {
-            _id: id,
             name: `testName-${id}`,
             email      : `testEmail@email.com-${id}`,
           }
@@ -42,7 +41,6 @@ describe('userModule', () => {
         id = "some-test-id";
 
         user = {
-          _id: id,
           name: 'testName',
           email      : 'testEmail@email.com',
         };

@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -11,6 +11,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Date: any;
 };
 
 
@@ -26,6 +27,7 @@ export type AuthToken = {
   __typename?: 'AuthToken';
   token?: Maybe<Scalars['String']>;
 };
+
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -57,14 +59,19 @@ export type QuerySignInArgs = {
   password: Scalars['String'];
 };
 
+export enum Role {
+  Admin = 'ADMIN',
+  User = 'USER'
+}
+
 export type User = {
   __typename?: 'User';
   _id?: Maybe<Scalars['ID']>;
   name: Scalars['String'];
-  email: Scalars['String'];
+  email?: Maybe<Scalars['String']>;
   games?: Maybe<Array<Scalars['ID']>>;
   characters?: Maybe<Array<Scalars['ID']>>;
-  createdAt?: Maybe<Scalars['String']>;
+  createdAt?: Maybe<Scalars['Date']>;
 };
 
 export type UserInput = {
@@ -158,9 +165,11 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   AuthToken: ResolverTypeWrapper<AuthToken>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  Date: ResolverTypeWrapper<Scalars['Date']>;
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
+  Role: Role;
   User: ResolverTypeWrapper<User>;
   UserInput: UserInput;
   AdditionalEntityFields: AdditionalEntityFields;
@@ -171,6 +180,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   AuthToken: AuthToken;
   String: Scalars['String'];
+  Date: Scalars['Date'];
   Mutation: {};
   Query: {};
   ID: Scalars['ID'];
@@ -180,9 +190,10 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
 };
 
-export type AuthDirectiveArgs = {  };
+export type AuthByRoleDirectiveArgs = {   requires?: Maybe<Role>;
+  allowSelf?: Maybe<Scalars['Boolean']>; };
 
-export type AuthDirectiveResolver<Result, Parent, ContextType = any, Args = AuthDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+export type AuthByRoleDirectiveResolver<Result, Parent, ContextType = any, Args = AuthByRoleDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type UnionDirectiveArgs = {   discriminatorField?: Maybe<Scalars['String']>;
   additionalFields?: Maybe<Array<Maybe<AdditionalEntityFields>>>; };
@@ -224,6 +235,10 @@ export type AuthTokenResolvers<ContextType = any, ParentType extends ResolversPa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
+  name: 'Date';
+}
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   _empty?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createUser?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'userInput'>>;
@@ -239,15 +254,16 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   _id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   games?: Resolver<Maybe<Array<ResolversTypes['ID']>>, ParentType, ContextType>;
   characters?: Resolver<Maybe<Array<ResolversTypes['ID']>>, ParentType, ContextType>;
-  createdAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = any> = {
   AuthToken?: AuthTokenResolvers<ContextType>;
+  Date?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
@@ -260,7 +276,7 @@ export type Resolvers<ContextType = any> = {
  */
 export type IResolvers<ContextType = any> = Resolvers<ContextType>;
 export type DirectiveResolvers<ContextType = any> = {
-  auth?: AuthDirectiveResolver<any, any, ContextType>;
+  authByRole?: AuthByRoleDirectiveResolver<any, any, ContextType>;
   union?: UnionDirectiveResolver<any, any, ContextType>;
   abstractEntity?: AbstractEntityDirectiveResolver<any, any, ContextType>;
   entity?: EntityDirectiveResolver<any, any, ContextType>;

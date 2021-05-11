@@ -2,11 +2,19 @@ import { gql } from 'graphql-modules';
 
 const typeDefs = [
   gql`
-      directive @auth on FIELD_DEFINITION | FIELD
+      directive @authByRole(
+          requires: Role,
+          allowSelf: Boolean
+      ) on OBJECT | FIELD_DEFINITION
+
+      enum Role {
+          ADMIN
+          USER
+      }
 
       extend type Query {
-          user(id:ID!): User @auth
-          me: User @auth
+          user(id:ID!): User @authByRole(requires:USER, allowSelf: true)
+          me: User
           signIn(email:String!, password:String!):AuthToken
       }
 
@@ -19,12 +27,12 @@ const typeDefs = [
       }
 
       type User {
-          _id: ID,
+          _id: ID
           name: String!
-          email: String!
-          games: [ID!]
-          characters: [ID!]
-          createdAt: String
+          email: String @authByRole(requires:ADMIN, allowSelf: true)
+          games: [ID!] @authByRole(requires:ADMIN, allowSelf: true)
+          characters: [ID!] @authByRole(requires:ADMIN, allowSelf: true)
+          createdAt: Date
       }
 
       input UserInput {
@@ -33,6 +41,6 @@ const typeDefs = [
           password: String!
       }
   `,
-]
+];
 
 export default typeDefs;
